@@ -1,41 +1,59 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const clova = require('@line/clova-cek-sdk-nodejs');
+const express = require('express');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const clovaSkillHandler = clova.Client
+    .configureSkill()
 
-var app = express();
+    // return response when first request
+    .onLaunchRequest(responseHelper => {
+      responseHelper.setSimpleSpeech({
+        lang: 'ja',
+        type: 'PlainText',
+        value: 'こんばんわ、CRemを起動しました。',
+      });
+    })
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+    // get request and return response
+    .onIntentRequest(async responseHelper => {
+      const intent = responseHelper.getIntentName();
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+      if(intent === 'temporarySearch'){
+        const slots = responseHelper.getSlots();
+        console.log(slots);
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+         var speech = {
+          lang: 'ja',
+          type: 'PlainText',
+          value: `まだ登録されていないです。`
+        }
+        if(slots.temp === '日本語'){
+          speech.value = `${slots.temp}は教えられません。`;
+        }
+      }
+      responseHelper.setSimpleSpeech(speech);
+      responseHelper.setSimpleSpeech(speech, true);
+      console.log(intent); // (debug) show intent
+    })
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+    // finish response
+    .onSessionEndedRequest(responseHelper => {
+      console.log("temp");
+        var speech = {
+            lang: 'ja',
+            type: 'PlainText',
+            value: `これで、終了です。お疲れ様でした。`
+        }
+        responseHelper.setSimpleSpeech(speech);
+        responseHelper.setSimpleSpeech(speech, true);
+    })
+    .handle();
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+const app = new express();
+const port = process.env.PORT || 3000;
 
-module.exports = app;
+// set application id
+const clovaMiddleware = clova.Middleware({applicationId: 'com.jellyfish.CRem'});
+app.post('/clova', clovaMiddleware, clovaSkillHandler);
+
+app.listen(port, () => console.log(`Server running on ${port}`));
