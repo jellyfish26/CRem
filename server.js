@@ -91,12 +91,12 @@ function normal_behaviour(event) {
     }
 
     if (event.message.text == "問題リストを表示") {
-        var question_list = "問題リスト:\n";
+        var question_list = "問題リスト:";
         // 問題リストを取得，いい感じに並べる処理
         var listObj = test_accessor.getList(event.source.userId);
 
         listObj.forEach(function(element){
-            question_list += (element.question + "," + element.answer) + "\n"; 
+            question_list += "\n" + (element.question + "," + element.answer); 
         });
         
         return question_list;
@@ -104,6 +104,7 @@ function normal_behaviour(event) {
 
     if (event.message.text == "問題リストを消去") {
         // リスト消去処理
+        test_accessor.clearList();
         return "問題リストを消去しました";
     }
 
