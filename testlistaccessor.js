@@ -46,7 +46,7 @@ exports.clearList = function (){
         data: []
     };
 
-    fs.writeFile("./testlist.json", JSON.stringify(list, null, '    '), function(err){
+    fs.writeFileSync("./testlist.json", JSON.stringify(list, null, '    '), function(err){
         if(err) throw err;
     });
 }
