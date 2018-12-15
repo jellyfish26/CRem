@@ -23,6 +23,8 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 
 // -------ここからLINE処理------------
 
+const test_accessor = require("./testlistaccessor");
+
 // 名称は後ですり合わせて変更する
 function question() {
     this.userId = "";
@@ -73,6 +75,8 @@ function handleEvent(event) {
             break;
     }
 
+    console.log(replyText);
+
     return client.replyMessage(event.replyToken, {
         type: 'text',
         text: replyText //実際に返信の言葉を入れる箇所
@@ -87,8 +91,14 @@ function normal_behaviour(event) {
     }
 
     if (event.message.text == "問題リストを表示") {
-        var question_list = "問題リスト";
+        var question_list = "問題リスト:\n";
         // 問題リストを取得，いい感じに並べる処理
+        var listObj = test_accessor.getList(event.source.userId);
+
+        listObj.forEach(function(element){
+            question_list += (element.question + "," + element.answer) + "\n"; 
+        });
+        
         return question_list;
     }
 
@@ -125,6 +135,8 @@ function answer_waiting_behaviour(event) {
 
     making_question.answer = event.message.text;
     making_question.userId = event.source.userId;
+
+    test_accessor.addData(making_question);
 
     // 回答を追加する処理 ---------->
 
