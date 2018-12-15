@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require("fs");
 const express = require('express');
 const line = require('@line/bot-sdk');
 const PORT = process.env.PORT || 3000;
@@ -45,6 +46,21 @@ var state = BOT_STATE.NORMAL;
 // 作成中のquestion
 var making_question = new question();
 
+var users = {
+    users: [
+        {
+            userId: "userId",
+            state: 0,
+            making: {
+                userId: "userId",
+                question: "問題",
+                answer: "答え"
+            }
+        }
+
+    ]
+}
+
 const client = new line.Client(config);
 
 function handleEvent(event) {
@@ -52,42 +68,82 @@ function handleEvent(event) {
         return Promise.resolve(null);
     }
 
+    var filteredUser = users.users.filter(function (item, index) {
+        if (item.userId == event.source.userId) return true;
+    });
+
+    var user = null;
+
+    if(filteredUser.length > 0)
+    {
+        user = filteredUser[0];   
+    }else
+    {
+        user = {
+            userId: event.source.userId,
+            state: 0,
+            making: {
+                userId: "userId",
+                question: "問題",
+                answer: "答え"
+            }
+        };
+    }
     // 返答に用いるmessage
     var message = {
         type: 'text',
         text: "message"
     };
 
-    switch (state) {
+    // !!!!!!
+    // この実装だとNORMAL以外のstateのとき他のユーザがアクセスすると詰み
+    // !!!!!!
+    switch (user.state) {
         case BOT_STATE.NORMAL:
             //通常状態の動作の記述
-            message = normal_behaviour(event);
+            message = normal_behaviour(event, user);
             break;
 
         case BOT_STATE.QUESTION_WAITING:
             //問題入力待ちの動作の記述
-            message = question_waiting_behaviour(event);
+            message = question_waiting_behaviour(event, user);
             break;
 
         case BOT_STATE.ANSWER_WAITING:
             //回答入力待ちの動作の記述
-            message = answer_waiting_behaviour(event);
+            message = answer_waiting_behaviour(event, user);
             break;
 
         default:
             break;
     }
 
+    if(filteredUser > 0)
+    {
+        users.users.forEach(function(element){
+            if(element.userId == user.userId)
+            {
+                element.state = user.state;
+                element.making = user.making;
+            }
+        });
+    }
+    else
+    {
+        users.users.push(user);
+    }
+
     console.log(message);
+    //console.log(JSON.stringify(users));
 
     return client.replyMessage(event.replyToken, message);
 }
 
 
-function normal_behaviour(event) {
+function normal_behaviour(event, user) {
     // 問題追加トリガーが送られたとき問題待ちに移行
     if (event.message.text == "問題を追加") {
-        state = BOT_STATE.QUESTION_WAITING;
+        user.state = BOT_STATE.QUESTION_WAITING;
         var message = {
             type: "text",
             text: "問題文を入力してください"
@@ -100,7 +156,70 @@ function normal_behaviour(event) {
 
         // リストの中身が存在するときはFlex Messageで返答を返す
         if (listObj.length > 0) {
-            var listTemplate = require('./flexmessagetemplate');
+            var listTemplate = {
+                "type": "bubble",
+                "styles": {
+                    "footer": {
+                        "separator": true
+                    }
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "問題リスト",
+                            "weight": "bold",
+                            "size": "xl",
+                            "margin": "md"
+                        },
+                        {
+                            "type": "separator",
+                            "margin": "xl"
+                        },
+
+                        // [2] 問題，回答をcontentsに格納する
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "margin": "xxl",
+                            "spacing": "sm",
+                            "contents": [
+
+                            ]
+                        },
+                        {
+                            "type": "separator",
+                            "margin": "xxl"
+                        },
+
+                        // [4]  contents[1].text = 'userId'
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "margin": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "USER ID",
+                                    "size": "xs",
+                                    "color": "#aaaaaa",
+                                    "flex": 0
+                                },
+                                // [1]
+                                {
+                                    "type": "text",
+                                    "text": "#743289384279",
+                                    "color": "#aaaaaa",
+                                    "size": "xs",
+                                    "align": "end"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
 
             listObj.forEach(function (element) {
                 var list_part = {
@@ -143,8 +262,7 @@ function normal_behaviour(event) {
 
             return message;
         }
-        else
-        {
+        else {
             var message = {
                 "type": "text",
                 "text": "問題リストが空です"
@@ -183,14 +301,14 @@ function normal_behaviour(event) {
 
 }
 
-function question_waiting_behaviour(event) {
+function question_waiting_behaviour(event, user) {
     // <-------- 問題文を追加する処理 
 
-    making_question.question = event.message.text;
+    user.making.question = event.message.text;
 
     // 問題文を追加する処理 --------->
 
-    state = BOT_STATE.ANSWER_WAITING;
+    user.state = BOT_STATE.ANSWER_WAITING;
     var message = {
         type: "text",
         text: "回答を入力してください"
@@ -198,26 +316,26 @@ function question_waiting_behaviour(event) {
     return message;
 }
 
-function answer_waiting_behaviour(event) {
+function answer_waiting_behaviour(event, user) {
     // <---------- 回答を追加する処理
 
-    making_question.answer = event.message.text;
-    making_question.userId = event.source.userId;
+    user.making.answer = event.message.text;
+    user.making.userId = event.source.userId;
 
     // テストのリストに格納
-    test_accessor.addData(making_question);
+    test_accessor.addData(user.making);
 
     // 回答を追加する処理 ---------->
 
     var response
-        = "(" + making_question.question
-        + "," + making_question.answer
+        = "(" + user.making.question
+        + "," + user.making.answer
         + ") で問題を登録しました";
 
-    making_question.question = "";
-    making_question.answer = "";
+    user.making.question = "";
+    user.making.answer = "";
 
-    state = BOT_STATE.NORMAL;
+    user.state = BOT_STATE.NORMAL;
     var message = {
         type: "text",
         text: response
