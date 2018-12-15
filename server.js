@@ -103,7 +103,6 @@ function normal_behaviour(event) {
             var listTemplate = require('./flexmessagetemplate');
 
             listObj.forEach(function (element) {
-                question_list += "\n" + (element.question + "," + element.answer);
                 var list_part = {
                     "type": "box",
                     "layout": "horizontal",
