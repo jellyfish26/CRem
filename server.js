@@ -29,6 +29,15 @@ function question() {
     this.answer = "";
 }
 
+// Botの状態の列挙
+const BOT_STATE = {
+    NORMAL : 0,
+    QUESTION_WAITING : 1,
+    ANSWER_WAITING : 2
+};
+
+// Botの状態
+var state = BOT_STATE.NORMAL;
 
 const client = new line.Client(config);
 
