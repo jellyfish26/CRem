@@ -19,7 +19,9 @@ const clovaSkillHandler = clova.Client
 
       if(intent === 'temporarySearch'){
         const slots = responseHelper.getSlots();
+        const userID = responseHelper.getUser();
         console.log(slots);
+        console.log(userID);
 
          var speech = {
           lang: 'ja',
