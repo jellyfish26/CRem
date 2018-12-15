@@ -1,0 +1,24 @@
+{
+  "name": "CRem",
+  "version": "1.0.0",
+  "description": "kosen hackathon",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jellyfish26/CRem.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jellyfish26/CRem/issues"
+  },
+  "homepage": "https://github.com/jellyfish26/CRem#readme",
+  "dependencies": {
+    "@line/bot-sdk": "^6.4.0",
+    "express": "^4.16.4"
+  }
+}
