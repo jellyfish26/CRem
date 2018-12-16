@@ -28,7 +28,7 @@ const test_accessor = require("./testlistaccessor");
 
 app.get("/list/:userId", function (req, res) {
     var userId = req.params.userId;
-    console.log(userId);
+
     var questionList = JSON.parse(fs.readFileSync("./testlist.json"));
 
     var filtered_question = questionList.data.filter(function (item, index) {
