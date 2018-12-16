@@ -26,6 +26,33 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 
 const test_accessor = require("./testlistaccessor");
 
+app.get("/list/:userId", function (req, res) {
+    var userId = req.params.userId;
+    console.log(userId);
+    var questionList = JSON.parse(fs.readFileSync("./testlist.json"));
+
+    var filtered_question = questionList.data.filter(function (item, index) {
+        if (item.userId == userId) {
+            return true;
+        }
+    });
+
+    var response = {
+        questions: []
+    };
+
+    filtered_question.forEach(function (element) {
+        response.questions.push({
+            question: element.question,
+            answer: element.answer
+        });
+    });
+
+    res.header('Content-Type', 'application/json; charset=utf-8');
+    res.send(response);
+
+});
+
 // 名称調整済み
 function question() {
     this.userId = "";
@@ -74,11 +101,9 @@ function handleEvent(event) {
 
     var user = null;
 
-    if(filteredUser.length > 0)
-    {
-        user = filteredUser[0];   
-    }else
-    {
+    if (filteredUser.length > 0) {
+        user = filteredUser[0];
+    } else {
         user = {
             userId: event.source.userId,
             state: 0,
@@ -118,18 +143,15 @@ function handleEvent(event) {
             break;
     }
 
-    if(filteredUser > 0)
-    {
-        users.users.forEach(function(element){
-            if(element.userId == user.userId)
-            {
+    if (filteredUser > 0) {
+        users.users.forEach(function (element) {
+            if (element.userId == user.userId) {
                 element.state = user.state;
                 element.making = user.making;
             }
         });
     }
-    else
-    {
+    else {
         users.users.push(user);
     }
 
