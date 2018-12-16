@@ -64,7 +64,8 @@ function question() {
 const BOT_STATE = {
     NORMAL: 0,
     QUESTION_WAITING: 1,
-    ANSWER_WAITING: 2
+    ANSWER_WAITING: 2,
+    QUESTION_ANSWER_WAITING: 3
 };
 
 var users = {
@@ -133,6 +134,10 @@ function handleEvent(event) {
             message = answer_waiting_behaviour(event, user);
             break;
 
+        case BOT_STATE.QUESTION_ANSWER_WAITING:
+            message = question_answer_waiting_behaviour(event, user);
+            break;
+
         default:
             break;
     }
@@ -164,6 +169,16 @@ function normal_behaviour(event, user) {
             type: "text",
             text: "問題文を入力してください"
         };
+        return message;
+    }
+
+    if (event.message.text == "問題をまとめて追加") {
+        user.state = BOT_STATE.QUESTION_ANSWER_WAITING;
+        var message = {
+            type: "text",
+            text: "問題文をまとめて追加します．\n 「問題,回答」の形式で入力してください"
+        }
+
         return message;
     }
 
@@ -356,6 +371,50 @@ function answer_waiting_behaviour(event, user) {
         type: "text",
         text: response
     };
+    return message;
+}
+
+function question_answer_waiting_behaviour(event, user) {
+    if (event.message.text == "まとめて追加を終了") {
+        user.state = BOT_STATE.NORMAL;
+        var message = {
+            type: "text",
+            text: "まとめて追加を終了しました"
+        };
+        return message;
+    }
+
+    var qa = event.message.text.split(",");
+
+    var response = "";
+
+    if (qa.length == 2) {
+        user.making.question = qa[0];
+        user.making.answer = qa[1];
+        user.making.userId = event.source.userId;
+
+        // テストのリストに格納
+        test_accessor.addData(user.making);
+
+        // 回答を追加する処理 ---------->
+
+        response = "(" + user.making.question
+            + "," + user.making.answer
+            + ") で問題を登録しました";
+
+        user.making.question = "";
+        user.making.answer = "";
+    }
+    else
+    {
+        response = "対応していない文字列です";
+    }
+
+    var message = {
+        type: "text",
+        text: response
+    }
+
     return message;
 }
 
