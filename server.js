@@ -296,7 +296,7 @@ function normal_behaviour(event, user) {
 
     if (event.message.text == "問題リストを消去") {
         // リスト消去処理
-        test_accessor.clearList();
+        test_accessor.clearList(event.source.userId);
         var message = {
             type: "text",
             text: "問題リストを消去しました"
