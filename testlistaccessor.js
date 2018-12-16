@@ -41,12 +41,18 @@ exports.getList = function (userId){
     return filteredList;
 }
 
-exports.clearList = function (){
-    var list = {
+exports.clearList = function (userId){
+    var list = JSON.parse(fs.readFileSync("./testlist.json", "utf8"));
+    var filteredList = list.data.filter(function(item, index){
+        if(item.userId != userId) return true;
+    });
+    var newList = {
         data: []
     };
 
-    fs.writeFileSync("./testlist.json", JSON.stringify(list, null, '    '), function(err){
+    newList.data = filteredList;
+
+    fs.writeFileSync("./testlist.json", JSON.stringify(newList, null, '    '), function(err){
         if(err) throw err;
     });
 }
