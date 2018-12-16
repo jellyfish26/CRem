@@ -67,12 +67,6 @@ const BOT_STATE = {
     ANSWER_WAITING: 2
 };
 
-// Botの状態
-var state = BOT_STATE.NORMAL;
-
-// 作成中のquestion
-var making_question = new question();
-
 var users = {
     users: [
         {
