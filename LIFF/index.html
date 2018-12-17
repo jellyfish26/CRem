@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <title>Crem まとめて問題を追加</title>
+    <link rel="stylesheet"  type="text/css" href="index.css">
+  </head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script src="https://d.line-scdn.net/liff/1.0/sdk.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.js" integrity="sha256-fNXJFIlca05BIO2Y5zh1xrShK3ME+/lYZ0j+ChxX2DA=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="script.js"></script>
+  <body>
+      <div class="form">
+        <form name = "form" id = "mainform">
+          <div class="form-group">
+            <label for="input_pro">問題</label>
+            <input type="text" name="problem" class="form-control" id="input_pro" placeholder="Question">
+          </div>
+          <div class="form-group">
+            <label for="input_ans">解答</label><br>
+            <input type="text" name="answer" class="form-control" id="input_ans" placeholder="Answer">
+          </div>
+        </form>
+      </div>
+      <a id='result'></a><br>
+      <button type="button" class="btn btn-primary" id="register">登録</button>
+
+      <button type="button" class="btn btn-primary" id="done">完了</button>
+
+  </body>
+</html>
