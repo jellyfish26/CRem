@@ -23,7 +23,6 @@ $(function(){
   $('#register').on('click',function(){
     var pro = $('#input_pro').val();
     var ans = $('#input_ans').val();
-    $('#result').html('<a id="result">'+'問題:'+pro+',解答:'+ans+'で送信完了</a>');
     console.log(pro+","+ans);
     liff.sendMessages([
       {

@@ -5,22 +5,7 @@ body{
   width: 100vw;
   height: 100vh;
 }
-.title{
-  /* background-color: #353A3F; */
-  color: #000000;
-  margin: 0%;
-  font-weight: bold;
-  width: 100vw;
-  height: 5vh;
-  font-size: 3vh;
-}
 .form{
   margin-top: 5%;
 }
-.test{
-  text-align: center;
-}
-
-.result{
-  text-align: left;
-}
+ 
