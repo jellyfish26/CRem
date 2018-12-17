@@ -4,6 +4,7 @@ const webClient = require("request");
 var postQuestionNumber = 0;
 var questionAnswerSet;
 var getQuestionLength = 0;
+console.log(japanese("あ"));
 
 const clovaSkillHandler = clova.Client
     .configureSkill()
@@ -22,7 +23,7 @@ const clovaSkillHandler = clova.Client
           questionAnswerSet = JSON.parse(body).questions;
           getQuestionLength = questionAnswerSet.length;
           console.log(questionAnswerSet);
-          if (getQuestionLength != 0) {
+          if (getQuestionLength !== 0) {
               console.log(questionAnswerSet[postQuestionNumber].question);
           }
       })
@@ -37,29 +38,38 @@ const clovaSkillHandler = clova.Client
         var speakContents = {
             lang: 'ja',
             type: 'PlainText',
-            value: `none    `
+            value: `none`
         };
 
-        if (getQuestionLength == 0) {
-            speakContents.value = "問題が登録されていません。問題を登録してからアプリを起動してください。"
+        if (getQuestionLength === 0) {
+            speakContents.lang = 'ja';
+            speakContents.value = "問題が登録されていません。問題を登録してからアプリを起動してください。";
+        } else if(postQuestionNumber > getQuestionLength) {
+            speakContents.lang = 'ja';
+            speakContents.value = "これ以上問題がありません。"
         } else {
             if (intent === 'requestProblem') {
                 const slots = responseHelper.getSlots();
                 console.log(slots);
-                speakContents.value = questionAnswerSet[postQuestionNumber].question;
 
-                if (continuousRequest) {
-                    // value change
-                    speakContents.value = 'すでに問題は出題されています。'
+                if (japanese(questionAnswerSet[postQuestionNumber].question)) {
+                    speakContents.value = 'ja'
                 } else {
-                    continuousRequest = true;
+                    speakContents.value = 'en'
                 }
+                speakContents.value = questionAnswerSet[postQuestionNumber].question;
             } else if (intent === 'nextProblem') {
                 const slots = responseHelper.getSlots();
                 console.log(slots);
                 continuousRequest = false;
 
-                speakContents.value = `答えは${questionAnswerSet[postQuestionNumber].answer}です。`
+                if (japanese(questionAnswerSet[postQuestionNumber].answer)) {
+                    speakContents.value = 'ja'
+                } else {
+                    speakContents.value = 'en'
+                }
+
+                speakContents.value = `答えは${questionAnswerSet[postQuestionNumber].answer}です。`;
                 ++postQuestionNumber;
             } else if(intent === 'temporarySearch') {
                 const slots = responseHelper.getSlots();
@@ -105,3 +115,7 @@ const clovaMiddleware = clova.Middleware({applicationId: 'com.kosen.crem'});
 app.post('/', clovaMiddleware, clovaSkillHandler);
 
 app.listen(port, () => console.log(`Server running on ${port}`));
+
+function japanese ( str ) {
+    return !!(str.match(/^[\u30a0-\u30ff\u3040-\u309f\u3005-\u3006\u30e0-\u9fcf]+$/))
+}
